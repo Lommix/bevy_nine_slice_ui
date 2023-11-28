@@ -43,7 +43,7 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                         },
                         ..default()
                     })
-                    .insert(NineSliceTexture::new(server.load("panel.png")));
+                    .insert(NineSliceTexture::from_image(server.load("panel.png")));
 
                 builder
                     .spawn(NodeBundle {
@@ -55,7 +55,10 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                         },
                         ..default()
                     })
-                    .insert(NineSliceTexture::new(server.load("panel.png")));
+                    .insert(NineSliceTexture::from_slice(
+                        server.load("panel_atlas.png"),
+                        Rect::new(0., 0., 32., 32.),
+                    ));
             });
 
         builder
@@ -68,7 +71,10 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                 },
                 ..default()
             })
-            .insert(NineSliceTexture::new(server.load("panel.png")));
+            .insert(NineSliceTexture::from_slice(
+                server.load("panel_atlas.png"),
+                Rect::new(32., 0., 32. + 48., 48.),
+            ));
     });
 
     cmd.spawn(Camera2dBundle::default());

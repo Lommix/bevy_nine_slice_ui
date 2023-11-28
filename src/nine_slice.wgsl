@@ -8,12 +8,21 @@ var image_sampler: sampler;
 
 @group(1) @binding(2)
 var<uniform> surface_size: vec2<f32>;
+@group(1) @binding(3)
+var<uniform> bound_min: vec2<f32>;
+@group(1) @binding(4)
+var<uniform> bound_max: vec2<f32>;
 
 
 @fragment
 fn fragment(in: UiVertexOutput) -> @location(0) vec4<f32> {
-    let pixel_pos = in.uv * surface_size;
-    let texture_size_px = vec2<f32>(textureDimensions(image));
+	let patch_uv = nine_patch_uv(in.uv);
+	return get_tile(patch_uv, bound_min, bound_max);
+}
+
+fn nine_patch_uv(in_uv : vec2<f32>) -> vec2<f32> {
+    let pixel_pos = in_uv * surface_size;
+    let texture_size_px = bound_max - bound_min;
     let patch_size_px = texture_size_px / 3.0;
     let width = surface_size.x / patch_size_px.x;
     let height = surface_size.y / patch_size_px.y;
@@ -42,5 +51,17 @@ fn fragment(in: UiVertexOutput) -> @location(0) vec4<f32> {
 	}
 
     let border_uv = (patch_uv + vec2<f32>(border_x, border_y)) / 3.0;
-    return textureSample(image, image_sampler, border_uv);
+	return border_uv;
+}
+
+
+fn get_tile(uv: vec2<f32>, min: vec2<f32>, max: vec2<f32>) -> vec4<f32> {
+    var out: vec4<f32>;
+    let texture_size = vec2<f32>(textureDimensions(image));
+    let start_uv = min / texture_size;
+    let end_uv = max / texture_size;
+    let distance = abs(start_uv - end_uv);
+    let tile_uv = start_uv + distance * uv;
+    out = textureSample(image, image_sampler, tile_uv);
+    return out;
 }

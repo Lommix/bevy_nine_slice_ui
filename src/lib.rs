@@ -42,21 +42,34 @@ fn sync_nine_slice(
 ) {
     nodes.iter().for_each(|(node, handle)| {
         if let Some(mat) = materials.get_mut(handle) {
-            mat.size = node.size();
+            mat.surface_size = node.size();
         }
     });
 }
 
 fn spawn_nine_slice(
     nodes: Query<(Entity, &NineSliceTexture, &Node), Without<Handle<NineSliceMaterial>>>,
+    images: Res<Assets<Image>>,
     mut cmd: Commands,
     mut materials: ResMut<Assets<NineSliceMaterial>>,
 ) {
     nodes.iter().for_each(|(entity, nine_slice, node)| {
+        let bounds = match nine_slice.bounds {
+            Some(bounds) => bounds,
+            None => match images.get(&nine_slice.atlas) {
+                Some(img) => Rect::from_corners(Vec2::ZERO, img.size_f32()),
+                // return if the image hasn't loaded yet
+                None => return,
+            },
+        };
+
         let material = materials.add(NineSliceMaterial {
-            atlas: nine_slice.0.clone(),
-            size: node.size(),
+            atlas: nine_slice.atlas.clone(),
+            surface_size: node.size(),
+            bound_min: bounds.min,
+            bound_max: bounds.max,
         });
+
         cmd.entity(entity)
             .remove::<NineSliceTexture>()
             .insert(material);
@@ -64,10 +77,26 @@ fn spawn_nine_slice(
 }
 
 #[derive(Component)]
-pub struct NineSliceTexture(Handle<Image>);
+pub struct NineSliceTexture {
+    atlas: Handle<Image>,
+    bounds: Option<Rect>,
+}
+
 impl NineSliceTexture {
-    pub fn new(image: Handle<Image>) -> Self {
-        Self(image)
+    /// Create a new NineSliceTexture from an image
+    pub fn from_image(image: Handle<Image>) -> Self {
+        Self {
+            atlas: image,
+            bounds: None,
+        }
+    }
+
+    /// Create a new NineSliceTexture from a slice of an atlas
+    pub fn from_slice(atlas: Handle<Image>, bounds: Rect) -> Self {
+        Self {
+            atlas,
+            bounds: Some(bounds),
+        }
     }
 }
 
@@ -76,9 +105,12 @@ pub struct NineSliceMaterial {
     #[texture(0)]
     #[sampler(1)]
     atlas: Handle<Image>,
-
     #[uniform(2)]
-    size: Vec2,
+    surface_size: Vec2,
+    #[uniform(3)]
+    bound_min: Vec2,
+    #[uniform(4)]
+    bound_max: Vec2,
 }
 
 impl UiMaterial for NineSliceMaterial {

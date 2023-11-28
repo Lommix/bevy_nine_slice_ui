@@ -25,8 +25,19 @@ fn spawn_ui(mut cmd: Commands, server: Res<AssetServer>) {
         },
         ..default()
     })
-    .insert(NineSliceTexture::new(server.load("panel.png")));
+    .insert(NineSliceTexture::from_image(server.load("panel.png")));
 }
+```
+
+### Using an atlas instead of a single image
+
+Also added atlas capabilities. Instead of `from_image`, use `from_slice` method and pass the texture bounds.
+
+```rust
+.insert(NineSliceTexture::from_slice(
+    server.load("panel_atlas.png"),
+    Rect::new(0., 0., 32., 32.),
+));
 ```
 
 Check out the example
@@ -35,11 +46,7 @@ Check out the example
 cargo run --example ui
 ```
 
-original
-
-![Source](assets/panel.png)
-
-result
+result:
 
 ![Example](docs/example.jpeg)
 
