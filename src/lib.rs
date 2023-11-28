@@ -1,7 +1,6 @@
 use std::time::Duration;
 
 use bevy::{
-    asset::embedded_asset,
     prelude::*,
     render::render_resource::{AsBindGroup, ShaderRef},
     time::common_conditions::on_timer,
@@ -14,6 +13,8 @@ pub mod prelude {
 pub struct NineSlicePlugin {
     sync_rate_ms: u64,
 }
+
+const SHADER_HANDLE: Handle<Shader> = Handle::weak_from_u128(1211396483470153564541);
 
 impl Default for NineSlicePlugin {
     fn default() -> Self {
@@ -29,7 +30,9 @@ impl Plugin for NineSlicePlugin {
             sync_nine_slice.run_if(on_timer(Duration::from_millis(self.sync_rate_ms))),
         );
 
-        embedded_asset!(app, "./nine_slice.wgsl");
+        let mut shaders = app.world.get_resource_mut::<Assets<Shader>>().unwrap();
+        let shader = Shader::from_wgsl(include_str!("./nine_slice.wgsl"), "./nine_slice.wgsl");
+        shaders.insert(SHADER_HANDLE, shader);
     }
 }
 
@@ -80,6 +83,6 @@ pub struct NineSliceMaterial {
 
 impl UiMaterial for NineSliceMaterial {
     fn fragment_shader() -> ShaderRef {
-        "embedded://bevy_nine_slice_ui/nine_slice.wgsl".into()
+        ShaderRef::Handle(SHADER_HANDLE)
     }
 }
