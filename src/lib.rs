@@ -29,7 +29,7 @@ impl Plugin for NineSlicePlugin {
             sync_nine_slice.run_if(on_timer(Duration::from_millis(self.sync_rate_ms))),
         );
 
-        embedded_asset!(app, "nine_slice.wgsl");
+        embedded_asset!(app, "./nine_slice.wgsl");
     }
 }
 

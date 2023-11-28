@@ -2,8 +2,8 @@
 name = "bevy_nine_slice_ui"
 version = "0.1.0"
 edition = "2021"
-author = "Lorenz Mielke"
-description = "A nine slice ui plugin for bevy ui nodes"
+authors = ["Lorenz Mielke"]
+description = "A nine slice texture plugin for bevy ui nodes"
 repository = "https://github.com/Lommix/bevy_nine_slice_ui"
 license = "MIT"
 
