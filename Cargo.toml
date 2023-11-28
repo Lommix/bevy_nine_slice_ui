@@ -4,9 +4,8 @@ version = "0.1.0"
 edition = "2021"
 author = "Lorenz Mielke"
 description = "A nine slice ui plugin for bevy ui nodes"
-repository = ""
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+repository = "https://github.com/Lommix/bevy_nine_slice_ui"
+license = "MIT"
 
 [dependencies]
 bevy = "0.12.0"
