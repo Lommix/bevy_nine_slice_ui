@@ -2,6 +2,10 @@
 
 Quick and easy auto-scaling nine slice/patch material for bevy ui nodes implemented as Fragment Shader.
 
+```bash
+cargo add bevy_nine_slice_ui
+```
+
 ## Usage
 
 It's a single component.
