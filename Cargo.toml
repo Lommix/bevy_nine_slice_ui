@@ -1,0 +1,12 @@
+[package]
+name = "bevy_nine_slice_ui"
+version = "0.1.0"
+edition = "2021"
+author = "Lorenz Mielke"
+description = "A nine slice ui plugin for bevy ui nodes"
+repository = ""
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "0.12.0"
