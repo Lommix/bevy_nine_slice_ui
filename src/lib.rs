@@ -4,6 +4,7 @@ use bevy::{
     prelude::*,
     render::render_resource::{AsBindGroup, ShaderRef},
     time::common_conditions::on_timer,
+    ui::FocusPolicy,
 };
 
 pub mod prelude {
@@ -33,6 +34,55 @@ impl Plugin for NineSlicePlugin {
         let mut shaders = app.world.get_resource_mut::<Assets<Shader>>().unwrap();
         let shader = Shader::from_wgsl(include_str!("./nine_slice.wgsl"), "./nine_slice.wgsl");
         shaders.insert(SHADER_HANDLE, shader);
+    }
+}
+
+#[derive(Bundle, Clone, Debug)]
+pub struct NineSliceMaterialBundle {
+    /// Describes the logical size of the node
+    pub node: Node,
+    /// Styles which control the layout (size and position) of the node and it's children
+    /// In some cases these styles also affect how the node drawn/painted.
+    pub style: Style,
+    /// The nine slice component
+    pub nine_slice_texture: NineSliceTexture,
+    /// Whether this node should block interaction with lower nodes
+    pub focus_policy: FocusPolicy,
+    // pub background_color: BackgroundColor,
+    /// The transform of the node
+    ///
+    /// This field is automatically managed by the UI layout system.
+    /// To alter the position of the `NodeBundle`, use the properties of the [`Style`] component.
+    pub transform: Transform,
+    /// The global transform of the node
+    ///
+    /// This field is automatically managed by the UI layout system.
+    /// To alter the position of the `NodeBundle`, use the properties of the [`Style`] component.
+    pub global_transform: GlobalTransform,
+    /// Describes the visibility properties of the node
+    pub visibility: Visibility,
+    /// Inherited visibility of an entity.
+    pub inherited_visibility: InheritedVisibility,
+    /// Algorithmically-computed indication of whether an entity is visible and should be extracted for rendering
+    pub view_visibility: ViewVisibility,
+    /// Indicates the depth at which the node should appear in the UI
+    pub z_index: ZIndex,
+}
+
+impl Default for NineSliceMaterialBundle {
+    fn default() -> Self {
+        Self {
+            node: Default::default(),
+            style: Default::default(),
+            nine_slice_texture: NineSliceTexture::from_image(Handle::default()),
+            focus_policy: Default::default(),
+            transform: Default::default(),
+            global_transform: Default::default(),
+            visibility: Default::default(),
+            inherited_visibility: Default::default(),
+            view_visibility: Default::default(),
+            z_index: Default::default(),
+        }
     }
 }
 
@@ -71,12 +121,12 @@ fn spawn_nine_slice(
         });
 
         cmd.entity(entity)
-            .remove::<NineSliceTexture>()
+            .remove::<BackgroundColor>()
             .insert(material);
     });
 }
 
-#[derive(Component)]
+#[derive(Component, Debug, Clone)]
 pub struct NineSliceTexture {
     atlas: Handle<Image>,
     bounds: Option<Rect>,

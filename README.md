@@ -16,16 +16,16 @@ app.add_plugin(NineSliceUiPlugin::default());
 
 ```rust
 fn spawn_ui(mut cmd: Commands, server: Res<AssetServer>) {
-    commands.spawn(NodeBundle {
+    commands.spawn(NineSliceMaterialBundle {
         style: Style {
             width: Val::Percent(100.),
             height: Val::Percent(50.),
             display: Display::Flex,
             ..default()
         },
+        nine_slice_texture: NineSliceTexture::from_image(server.load("panel_atlas.png")),
         ..default()
-    })
-    .insert(NineSliceTexture::from_image(server.load("panel.png")));
+    });
 }
 ```
 
@@ -34,10 +34,33 @@ fn spawn_ui(mut cmd: Commands, server: Res<AssetServer>) {
 Also added atlas capabilities. Instead of `from_image`, use `from_slice` method and pass the texture bounds.
 
 ```rust
+nine_slice_texture: NineSliceTexture::from_slice(
+    server.load("panel_atlas.png"),
+    Rect::new(32., 0., 32. + 48., 48.),
+),
+```
+
+### Adding a material to an existing Bundle
+
+You can also add a nine slice material to an existing bundle, like a button. Just beware, this might not always work. Just in the recent 12.1 update,
+the background color component broke the material. The background color component will now be removed from elements where the material is added.
+
+```rust
+.spawn(ButtonBundle {
+    style: Style {
+        width: Val::Px(150.),
+        height: Val::Px(50.),
+        display: Display::Flex,
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    },
+    ..default()
+})
 .insert(NineSliceTexture::from_slice(
     server.load("panel_atlas.png"),
     Rect::new(0., 0., 32., 32.),
-));
+))
 ```
 
 Check out the example
