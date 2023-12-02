@@ -7,22 +7,20 @@ var image: texture_2d<f32>;
 var image_sampler: sampler;
 
 @group(1) @binding(2)
-var<uniform> surface_size: vec2<f32>;
+var<uniform> surface_size: vec4<f32>;
 @group(1) @binding(3)
-var<uniform> bound_min: vec2<f32>;
-@group(1) @binding(4)
-var<uniform> bound_max: vec2<f32>;
+var<uniform> bounds: vec4<f32>;
 
 
 @fragment
 fn fragment(in: UiVertexOutput) -> @location(0) vec4<f32> {
 	let patch_uv = nine_patch_uv(in.uv);
-	return get_tile(patch_uv, bound_min, bound_max);
+	return get_tile(patch_uv, bounds.xy, bounds.zw);
 }
 
 fn nine_patch_uv(in_uv : vec2<f32>) -> vec2<f32> {
-    let pixel_pos = in_uv * surface_size;
-    let texture_size_px = bound_max - bound_min;
+    let pixel_pos = in_uv * surface_size.xy;
+    let texture_size_px = bounds.zw - bounds.xy;
     let patch_size_px = texture_size_px / 3.0;
     let width = surface_size.x / patch_size_px.x;
     let height = surface_size.y / patch_size_px.y;

@@ -92,7 +92,7 @@ fn sync_nine_slice(
 ) {
     nodes.iter().for_each(|(node, handle)| {
         if let Some(mat) = materials.get_mut(handle) {
-            mat.surface_size = node.size();
+            mat.surface_size = node.size().extend(0.).extend(0.);
         }
     });
 }
@@ -115,9 +115,8 @@ fn spawn_nine_slice(
 
         let material = materials.add(NineSliceMaterial {
             atlas: nine_slice.atlas.clone(),
-            surface_size: node.size(),
-            bound_min: bounds.min,
-            bound_max: bounds.max,
+            surface_size: node.size().extend(0.).extend(0.),
+            bounds: Vec4::new(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y),
         });
 
         cmd.entity(entity)
@@ -156,11 +155,9 @@ pub struct NineSliceMaterial {
     #[sampler(1)]
     atlas: Handle<Image>,
     #[uniform(2)]
-    surface_size: Vec2,
+    surface_size: Vec4,
     #[uniform(3)]
-    bound_min: Vec2,
-    #[uniform(4)]
-    bound_max: Vec2,
+    bounds: Vec4,
 }
 
 impl UiMaterial for NineSliceMaterial {
