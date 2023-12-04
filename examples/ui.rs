@@ -1,10 +1,10 @@
 use bevy::prelude::*;
-use bevy_nine_slice_ui::{prelude::*, NineSliceMaterialBundle};
+use bevy_nine_slice_ui::{prelude::*, NineSliceUiMaterialBundle};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
-        .add_plugins(NineSlicePlugin::default())
+        .add_plugins(NineSliceUiPlugin::default())
         .add_systems(Startup, setup)
         .run();
 }
@@ -34,7 +34,7 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
             })
             .with_children(|builder| {
                 builder
-                    .spawn(NineSliceMaterialBundle {
+                    .spawn(NineSliceUiMaterialBundle {
                         style: Style {
                             width: Val::Percent(50.),
                             height: Val::Percent(100.),
@@ -78,7 +78,7 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
             });
 
         builder
-            .spawn(NineSliceMaterialBundle {
+            .spawn(NineSliceUiMaterialBundle {
                 style: Style {
                     width: Val::Percent(100.),
                     height: Val::Percent(50.),

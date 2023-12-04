@@ -8,21 +8,21 @@ use bevy::{
 };
 
 pub mod prelude {
-    pub use crate::{NineSliceMaterial, NineSlicePlugin, NineSliceTexture};
+    pub use crate::{NineSliceMaterial, NineSliceTexture, NineSliceUiPlugin};
 }
 
-pub struct NineSlicePlugin {
+pub struct NineSliceUiPlugin {
     sync_rate_ms: u64,
 }
 
 const SHADER_HANDLE: Handle<Shader> = Handle::weak_from_u128(1211396483470153564541);
 
-impl Default for NineSlicePlugin {
+impl Default for NineSliceUiPlugin {
     fn default() -> Self {
         Self { sync_rate_ms: 100 }
     }
 }
-impl Plugin for NineSlicePlugin {
+impl Plugin for NineSliceUiPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(UiMaterialPlugin::<NineSliceMaterial>::default());
         app.add_systems(Update, spawn_nine_slice);
@@ -38,7 +38,7 @@ impl Plugin for NineSlicePlugin {
 }
 
 #[derive(Bundle, Clone, Debug)]
-pub struct NineSliceMaterialBundle {
+pub struct NineSliceUiMaterialBundle {
     /// Describes the logical size of the node
     pub node: Node,
     /// Styles which control the layout (size and position) of the node and it's children
@@ -69,7 +69,7 @@ pub struct NineSliceMaterialBundle {
     pub z_index: ZIndex,
 }
 
-impl Default for NineSliceMaterialBundle {
+impl Default for NineSliceUiMaterialBundle {
     fn default() -> Self {
         Self {
             node: Default::default(),
@@ -87,12 +87,23 @@ impl Default for NineSliceMaterialBundle {
 }
 
 fn sync_nine_slice(
-    nodes: Query<(&Node, &Handle<NineSliceMaterial>)>,
+    nodes: Query<(&Node, &NineSliceTexture, &Handle<NineSliceMaterial>)>,
+    images: Res<Assets<Image>>,
     mut materials: ResMut<Assets<NineSliceMaterial>>,
 ) {
-    nodes.iter().for_each(|(node, handle)| {
+    nodes.iter().for_each(|(node, nine_slice, handle)| {
         if let Some(mat) = materials.get_mut(handle) {
+            let bounds = match nine_slice.bounds {
+                Some(bounds) => bounds,
+                None => match images.get(&nine_slice.atlas) {
+                    Some(img) => Rect::from_corners(Vec2::ZERO, img.size_f32()),
+                    None => return,
+                },
+            };
+
             mat.surface_size = node.size().extend(0.).extend(0.);
+            mat.bounds = Vec4::new(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
+            mat.atlas = nine_slice.atlas.clone();
         }
     });
 }
