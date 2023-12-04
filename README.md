@@ -2,7 +2,14 @@
 
 Quick and easy auto-scaling nine slice/patch material for bevy ui nodes implemented as Fragment Shader.
 
-**Now WASM compatible!**
+### Features
+
+-   Sprite sheet animation support
+-   Wasm support
+-   Blend colors / tinting
+-   Color lookup gradients
+
+Making hover effects a breeze.
 
 ```bash
 cargo add bevy_nine_slice_ui
@@ -12,13 +19,15 @@ cargo add bevy_nine_slice_ui
 
 It's a single component.
 
+The plugin as has a `sync_rate_ms` parameter, which is the minimum time between updates in milliseconds. This is to prevent the material from updating too often. The default is 100ms.
+
 ```rust
 app.add_plugin(NineSliceUiPlugin::default());
 ```
 
 ```rust
 fn spawn_ui(mut cmd: Commands, server: Res<AssetServer>) {
-    commands.spawn(NineSliceMaterialBundle {
+    commands.spawn(NineSliceUiMaterialBundle {
         style: Style {
             width: Val::Percent(100.),
             height: Val::Percent(50.),
@@ -62,10 +71,31 @@ the background color component broke the material. The background color componen
 .insert(NineSliceTexture::from_slice(
     server.load("panel_atlas.png"),
     Rect::new(0., 0., 32., 32.),
-))
+));
+
 ```
 
-Check out the example
+## Modify the texture component
+
+You can modify the texture component to change the texture or the texture bounds. This enables simple sheet style animations.
+
+```rust
+// add a blend color
+NineSliceTexture::from_image(server.load("panel_atlas.png"))
+    .with_blend_color(Color::RED)
+    .with_blend_mix(0.5);
+
+
+// or why not a whole palatte gradient?
+// A 1D texture to use as color lookup, the grayscale value of the original color is used as UV
+// dark to light, left to right
+NineSliceTexture::from_image(server.load("panel_atlas.png"))
+    .with_lookup_gradient(server.load("4-color-palette.png"))
+    .with_gradient_mix(1.0);
+
+```
+
+Check out the example, there is everything you need to know.
 
 ```rust
 cargo run --example ui

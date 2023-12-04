@@ -10,12 +10,31 @@ var image_sampler: sampler;
 var<uniform> surface_size: vec4<f32>;
 @group(1) @binding(3)
 var<uniform> bounds: vec4<f32>;
+@group(1) @binding(4)
+var<uniform> blend_color: vec4<f32>;
+
+@group(1) @binding(5)
+var lookup_gradiant: texture_2d<f32>;
+@group(1) @binding(6)
+var lookup_gradiant_sampler: sampler;
+
+@group(1) @binding(7)
+var<uniform> blend: vec4<f32>;
 
 
 @fragment
 fn fragment(in: UiVertexOutput) -> @location(0) vec4<f32> {
 	let patch_uv = nine_patch_uv(in.uv);
-	return get_tile(patch_uv, bounds.xy, bounds.zw);
+	var out = get_tile(patch_uv, bounds.xy, bounds.zw);
+
+	out = mix(out, blend_color, blend.x);
+
+	let lookup_uv = (out.x + out.y + out.z) / 3.0;
+	let lookup_color = textureSample(lookup_gradiant, lookup_gradiant_sampler, vec2<f32>(lookup_uv, 0.5));
+
+	out = mix(out, lookup_color, blend.y);
+
+	return out;
 }
 
 fn nine_patch_uv(in_uv : vec2<f32>) -> vec2<f32> {

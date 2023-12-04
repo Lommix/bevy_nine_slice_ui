@@ -53,7 +53,9 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                             align_items: AlignItems::Center,
                             ..default()
                         },
-                        nine_slice_texture: NineSliceTexture::from_image(server.load("panel.png")),
+                        nine_slice_texture: NineSliceUiTexture::from_image(
+                            server.load("panel.png"),
+                        ),
                         ..default()
                     })
                     .with_children(|builder| {
@@ -76,15 +78,34 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                             width: Val::Percent(50.),
                             height: Val::Percent(100.),
                             display: Display::Flex,
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
                             ..default()
                         },
                         background_color: Color::BLACK.into(),
                         ..default()
                     })
-                    .insert(NineSliceTexture::from_slice(
-                        server.load("panel_atlas.png"),
-                        Rect::new(0., 0., 32., 32.),
-                    ));
+                    .insert(
+                        NineSliceUiTexture::from_slice(
+                            server.load("panel_atlas.png"),
+                            Rect::new(0., 0., 32., 32.),
+                        )
+                        .with_blend_color(Color::RED)
+                        .with_blend_mix(0.5),
+                    )
+                    .with_children(|builder| {
+                        builder.spawn(TextBundle {
+                            text: Text::from_section(
+                                "50 % mix Red",
+                                TextStyle {
+                                    font_size: 50.,
+                                    color: Color::BLACK,
+                                    ..default()
+                                },
+                            ),
+                            ..default()
+                        });
+                    });
             });
 
         builder
@@ -97,7 +118,7 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                     align_items: AlignItems::Center,
                     ..default()
                 },
-                nine_slice_texture: NineSliceTexture::from_slice(
+                nine_slice_texture: NineSliceUiTexture::from_slice(
                     server.load("panel_atlas.png"),
                     Rect::new(32., 0., 32. + 48., 48.),
                 ),
@@ -107,7 +128,7 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                 builder
                     .spawn(ButtonBundle {
                         style: Style {
-                            width: Val::Px(150.),
+                            width: Val::Px(180.),
                             height: Val::Px(50.),
                             display: Display::Flex,
                             justify_content: JustifyContent::Center,
@@ -117,16 +138,49 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                         ..default()
                     })
                     .insert(Animation(0))
-                    .insert(NineSliceTexture::from_slice(
+                    .insert(NineSliceUiTexture::from_slice(
                         server.load("panel_animation.png"),
                         Rect::new(0., 0., 32., 32.),
                     ))
                     .with_children(|builder| {
                         builder.spawn(TextBundle {
                             text: Text::from_section(
-                                "Button",
+                                "Animated button",
                                 TextStyle {
-                                    font_size: 32.,
+                                    font_size: 20.,
+                                    color: Color::BLACK,
+                                    ..default()
+                                },
+                            ),
+                            ..default()
+                        });
+                    });
+                builder
+                    .spawn(ButtonBundle {
+                        style: Style {
+                            width: Val::Px(180.),
+                            height: Val::Px(50.),
+                            display: Display::Flex,
+                            justify_content: JustifyContent::Center,
+                            align_items: AlignItems::Center,
+                            ..default()
+                        },
+                        ..default()
+                    })
+                    .insert(
+                        NineSliceUiTexture::from_slice(
+                            server.load("panel_animation.png"),
+                            Rect::new(0., 0., 32., 32.),
+                        )
+                        .with_lookup_gradient(server.load("4-color-palette.png"))
+                        .with_gradient_mix(1.0),
+                    )
+                    .with_children(|builder| {
+                        builder.spawn(TextBundle {
+                            text: Text::from_section(
+                                "Lookup gradient",
+                                TextStyle {
+                                    font_size: 20.,
                                     color: Color::BLACK,
                                     ..default()
                                 },
@@ -139,15 +193,13 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
     cmd.spawn(Camera2dBundle::default());
 }
 
-fn super_simple_animation(mut query: Query<( &mut NineSliceTexture, &mut Animation )>) {
-    query.iter_mut().for_each(|( mut nine_slice, mut frame )| {
+fn super_simple_animation(mut query: Query<(&mut NineSliceUiTexture, &mut Animation)>) {
+    query.iter_mut().for_each(|(mut nine_slice, mut frame)| {
         match &mut nine_slice.bounds {
             Some(bounds) => {
-
                 bounds.min.x = frame.0 as f32 * 32.;
                 bounds.max.x = 32. + frame.0 as f32 * 32.;
                 frame.0 = (frame.0 + 1) % 4;
-
             }
             None => (),
         };

@@ -8,7 +8,7 @@ use bevy::{
 };
 
 pub mod prelude {
-    pub use crate::{NineSliceMaterial, NineSliceTexture, NineSliceUiPlugin};
+    pub use crate::{NineSliceMaterial, NineSliceUiTexture, NineSliceUiPlugin};
 }
 
 pub struct NineSliceUiPlugin {
@@ -45,7 +45,7 @@ pub struct NineSliceUiMaterialBundle {
     /// In some cases these styles also affect how the node drawn/painted.
     pub style: Style,
     /// The nine slice component
-    pub nine_slice_texture: NineSliceTexture,
+    pub nine_slice_texture: NineSliceUiTexture,
     /// Whether this node should block interaction with lower nodes
     pub focus_policy: FocusPolicy,
     // pub background_color: BackgroundColor,
@@ -74,7 +74,7 @@ impl Default for NineSliceUiMaterialBundle {
         Self {
             node: Default::default(),
             style: Default::default(),
-            nine_slice_texture: NineSliceTexture::from_image(Handle::default()),
+            nine_slice_texture: NineSliceUiTexture::from_image(Handle::default()),
             focus_policy: Default::default(),
             transform: Default::default(),
             global_transform: Default::default(),
@@ -87,7 +87,7 @@ impl Default for NineSliceUiMaterialBundle {
 }
 
 fn sync_nine_slice(
-    nodes: Query<(&Node, &NineSliceTexture, &Handle<NineSliceMaterial>)>,
+    nodes: Query<(&Node, &NineSliceUiTexture, &Handle<NineSliceMaterial>)>,
     images: Res<Assets<Image>>,
     mut materials: ResMut<Assets<NineSliceMaterial>>,
 ) {
@@ -106,16 +106,23 @@ fn sync_nine_slice(
             mat.bounds.y = bounds.min.y;
             mat.bounds.z = bounds.max.x;
             mat.bounds.w = bounds.max.y;
+            mat.blend_color = nine_slice.blend_color.into();
+            mat.mix.x = nine_slice.blend_mix;
+            mat.mix.y = nine_slice.gradient_mix;
 
             if mat.atlas != nine_slice.atlas {
                 mat.atlas = nine_slice.atlas.clone();
+            }
+
+            if mat.lookup_gradient != nine_slice.gradient {
+                mat.lookup_gradient = nine_slice.gradient.clone();
             }
         }
     });
 }
 
 fn spawn_nine_slice(
-    nodes: Query<(Entity, &NineSliceTexture, &Node), Without<Handle<NineSliceMaterial>>>,
+    nodes: Query<(Entity, &NineSliceUiTexture, &Node), Without<Handle<NineSliceMaterial>>>,
     images: Res<Assets<Image>>,
     mut cmd: Commands,
     mut materials: ResMut<Assets<NineSliceMaterial>>,
@@ -134,6 +141,9 @@ fn spawn_nine_slice(
             atlas: nine_slice.atlas.clone(),
             surface_size: node.size().extend(0.).extend(0.),
             bounds: Vec4::new(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y),
+            blend_color: nine_slice.blend_color.into(),
+            lookup_gradient: nine_slice.gradient.clone(),
+            mix: Vec4::new(nine_slice.blend_mix, nine_slice.gradient_mix, 0., 0.),
         });
 
         cmd.entity(entity)
@@ -142,18 +152,32 @@ fn spawn_nine_slice(
     });
 }
 
+/// A component that describes a nine slice texture
 #[derive(Component, Debug, Clone)]
-pub struct NineSliceTexture {
+pub struct NineSliceUiTexture {
+    /// The atlas to use for the nine slice
     pub atlas: Handle<Image>,
+    /// The bounds of the nine slice in the atlas
     pub bounds: Option<Rect>,
+    /// The color to blend the nine slice with, alpha is used for blending
+    pub blend_color: Color,
+    pub blend_mix: f32,
+    /// A 1D texture to use as color lookup, the grayscale value of the original color is used as UV
+    /// dark to light, left to right
+    pub gradient: Handle<Image>,
+    pub gradient_mix: f32,
 }
 
-impl NineSliceTexture {
+impl NineSliceUiTexture {
     /// Create a new NineSliceTexture from an image
     pub fn from_image(image: Handle<Image>) -> Self {
         Self {
             atlas: image,
             bounds: None,
+            blend_color: Color::default(),
+            blend_mix: 0.0,
+            gradient: Handle::default(),
+            gradient_mix: 0.0,
         }
     }
 
@@ -162,7 +186,31 @@ impl NineSliceTexture {
         Self {
             atlas,
             bounds: Some(bounds),
+            blend_color: Color::default(),
+            blend_mix: 0.0,
+            gradient: Handle::default(),
+            gradient_mix: 0.0,
         }
+    }
+
+    pub fn with_lookup_gradient(mut self, gradiant: Handle<Image>) -> Self {
+        self.gradient = gradiant;
+        self
+    }
+
+    pub fn with_blend_mix(mut self, blend: f32) -> Self {
+        self.blend_mix = blend;
+        self
+    }
+
+    pub fn with_gradient_mix(mut self, blend: f32) -> Self {
+        self.gradient_mix = blend;
+        self
+    }
+
+    pub fn with_blend_color(mut self, color: Color) -> Self {
+        self.blend_color = color;
+        self
     }
 }
 
@@ -175,6 +223,13 @@ pub struct NineSliceMaterial {
     surface_size: Vec4,
     #[uniform(3)]
     bounds: Vec4,
+    #[uniform(4)]
+    blend_color: Vec4,
+    #[texture(5)]
+    #[sampler(6)]
+    lookup_gradient: Handle<Image>,
+    #[uniform(7)]
+    mix: Vec4,
 }
 
 impl UiMaterial for NineSliceMaterial {
