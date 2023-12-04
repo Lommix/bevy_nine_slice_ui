@@ -102,8 +102,14 @@ fn sync_nine_slice(
             };
 
             mat.surface_size = node.size().extend(0.).extend(0.);
-            mat.bounds = Vec4::new(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y);
-            mat.atlas = nine_slice.atlas.clone();
+            mat.bounds.x = bounds.min.x;
+            mat.bounds.y = bounds.min.y;
+            mat.bounds.z = bounds.max.x;
+            mat.bounds.w = bounds.max.y;
+
+            if mat.atlas != nine_slice.atlas {
+                mat.atlas = nine_slice.atlas.clone();
+            }
         }
     });
 }
@@ -138,8 +144,8 @@ fn spawn_nine_slice(
 
 #[derive(Component, Debug, Clone)]
 pub struct NineSliceTexture {
-    atlas: Handle<Image>,
-    bounds: Option<Rect>,
+    pub atlas: Handle<Image>,
+    pub bounds: Option<Rect>,
 }
 
 impl NineSliceTexture {

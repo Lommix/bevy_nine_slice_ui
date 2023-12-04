@@ -1,4 +1,6 @@
-use bevy::prelude::*;
+use std::time::Duration;
+
+use bevy::{prelude::*, time::common_conditions::on_timer};
 use bevy_nine_slice_ui::{prelude::*, NineSliceUiMaterialBundle};
 
 fn main() {
@@ -6,8 +8,16 @@ fn main() {
         .add_plugins(DefaultPlugins.set(ImagePlugin::default_nearest()))
         .add_plugins(NineSliceUiPlugin::default())
         .add_systems(Startup, setup)
+        .add_systems(
+            Update,
+            super_simple_animation.run_if(on_timer(Duration::from_millis(250))),
+        )
         .run();
 }
+
+// keeps track of the current animation frame
+#[derive(Component)]
+pub struct Animation(usize);
 
 fn setup(mut cmd: Commands, server: Res<AssetServer>) {
     cmd.spawn(NodeBundle {
@@ -106,8 +116,9 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                         },
                         ..default()
                     })
+                    .insert(Animation(0))
                     .insert(NineSliceTexture::from_slice(
-                        server.load("panel_atlas.png"),
+                        server.load("panel_animation.png"),
                         Rect::new(0., 0., 32., 32.),
                     ))
                     .with_children(|builder| {
@@ -125,6 +136,20 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                     });
             });
     });
-
     cmd.spawn(Camera2dBundle::default());
+}
+
+fn super_simple_animation(mut query: Query<( &mut NineSliceTexture, &mut Animation )>) {
+    query.iter_mut().for_each(|( mut nine_slice, mut frame )| {
+        match &mut nine_slice.bounds {
+            Some(bounds) => {
+
+                bounds.min.x = frame.0 as f32 * 32.;
+                bounds.max.x = 32. + frame.0 as f32 * 32.;
+                frame.0 = (frame.0 + 1) % 4;
+
+            }
+            None => (),
+        };
+    });
 }
