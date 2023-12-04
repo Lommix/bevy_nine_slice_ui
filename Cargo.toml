@@ -1,6 +1,6 @@
 [package]
 name = "bevy_nine_slice_ui"
-version = "0.4.0"
+version = "0.5.0"
 edition = "2021"
 authors = ["Lorenz Mielke"]
 description = "A nine slice/patch texture plugin for bevy ui nodes, works in wasm"
