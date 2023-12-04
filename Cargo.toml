@@ -8,5 +8,10 @@ keywords = ["bevy", "ui", "nine", "patch", "slice"]
 repository = "https://github.com/Lommix/bevy_nine_slice_ui"
 license = "MIT"
 
-[dependencies]
+[dependencies.bevy]
+version = "0.12.1"
+default-features = false
+features = ["bevy_render", "bevy_ui", "bevy_asset"]
+
+[dev-dependencies]
 bevy = "0.12.1"
