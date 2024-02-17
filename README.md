@@ -11,6 +11,13 @@ Quick and easy auto-scaling nine slice/patch material for bevy ui nodes implemen
 
 Making hover effects a breeze.
 
+### Compatibility
+
+| Nince Slice | Bevy |
+| ----------- | ---- |
+| 0.6         | 0.13 |
+| 0.5         | 0.12 |
+
 ```bash
 cargo add bevy_nine_slice_ui
 ```
@@ -104,7 +111,3 @@ cargo run --example ui
 result:
 
 ![Example](docs/example.jpeg)
-
-### Compatibility
-
--   **Bevy 0.12**
