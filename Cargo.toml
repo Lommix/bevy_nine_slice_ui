@@ -1,6 +1,6 @@
 [package]
 name = "bevy_nine_slice_ui"
-version = "0.5.0"
+version = "0.6.0"
 edition = "2021"
 authors = ["Lorenz Mielke"]
 description = "A nine slice/patch texture plugin for bevy ui nodes, works in wasm"
@@ -9,9 +9,9 @@ repository = "https://github.com/Lommix/bevy_nine_slice_ui"
 license = "MIT"
 
 [dependencies.bevy]
-version = "0.12.1"
+version = "0.13.0"
 default-features = false
 features = ["bevy_render", "bevy_ui", "bevy_asset"]
 
 [dev-dependencies]
-bevy = "0.12.1"
+bevy = "0.13"

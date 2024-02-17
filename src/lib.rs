@@ -106,7 +106,7 @@ fn sync_nine_slice(
             mat.bounds.y = bounds.min.y;
             mat.bounds.z = bounds.max.x;
             mat.bounds.w = bounds.max.y;
-            mat.blend_color = nine_slice.blend_color.into();
+            mat.blend_color = nine_slice.blend_color.rgba_to_vec4();
             mat.mix.x = nine_slice.blend_mix;
             mat.mix.y = nine_slice.gradient_mix;
 
@@ -141,7 +141,7 @@ fn spawn_nine_slice(
             atlas: nine_slice.atlas.clone(),
             surface_size: node.size().extend(0.).extend(0.),
             bounds: Vec4::new(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y),
-            blend_color: nine_slice.blend_color.into(),
+            blend_color: nine_slice.blend_color.rgba_to_vec4(),
             lookup_gradient: nine_slice.gradient.clone(),
             mix: Vec4::new(nine_slice.blend_mix, nine_slice.gradient_mix, 0., 0.),
         });
