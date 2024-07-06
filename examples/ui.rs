@@ -90,7 +90,7 @@ fn setup(mut cmd: Commands, server: Res<AssetServer>) {
                             server.load("panel_atlas.png"),
                             Rect::new(0., 0., 32., 32.),
                         )
-                        .with_blend_color(Color::RED)
+                        .with_blend_color(Color::from(LinearRgba::RED))
                         .with_blend_mix(0.5),
                     )
                     .with_children(|builder| {
