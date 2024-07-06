@@ -8,7 +8,7 @@ use bevy::{
 };
 
 pub mod prelude {
-    pub use crate::{NineSliceMaterial, NineSliceUiTexture, NineSliceUiPlugin};
+    pub use crate::{NineSliceMaterial, NineSliceUiPlugin, NineSliceUiTexture};
 }
 
 pub struct NineSliceUiPlugin {
@@ -31,9 +31,12 @@ impl Plugin for NineSliceUiPlugin {
             sync_nine_slice.run_if(on_timer(Duration::from_millis(self.sync_rate_ms))),
         );
 
-        let mut shaders = app.world.get_resource_mut::<Assets<Shader>>().unwrap();
+        let mut shaders = app
+            .world_mut()
+            .get_resource_mut::<Assets<Shader>>()
+            .unwrap();
         let shader = Shader::from_wgsl(include_str!("./nine_slice.wgsl"), "./nine_slice.wgsl");
-        shaders.insert(SHADER_HANDLE, shader);
+        shaders.insert(&SHADER_HANDLE, shader);
     }
 }
 
@@ -106,7 +109,7 @@ fn sync_nine_slice(
             mat.bounds.y = bounds.min.y;
             mat.bounds.z = bounds.max.x;
             mat.bounds.w = bounds.max.y;
-            mat.blend_color = nine_slice.blend_color.rgba_to_vec4();
+            mat.blend_color = nine_slice.blend_color.to_linear().to_vec4();
             mat.mix.x = nine_slice.blend_mix;
             mat.mix.y = nine_slice.gradient_mix;
 
@@ -141,7 +144,7 @@ fn spawn_nine_slice(
             atlas: nine_slice.atlas.clone(),
             surface_size: node.size().extend(0.).extend(0.),
             bounds: Vec4::new(bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y),
-            blend_color: nine_slice.blend_color.rgba_to_vec4(),
+            blend_color: nine_slice.blend_color.to_linear().to_vec4(),
             lookup_gradient: nine_slice.gradient.clone(),
             mix: Vec4::new(nine_slice.blend_mix, nine_slice.gradient_mix, 0., 0.),
         });
