@@ -2,6 +2,11 @@
 
 Quick and easy auto-scaling nine slice/patch material for bevy ui nodes implemented as Fragment Shader.
 
+## !Update!
+
+In bevy 0.15 the nine slice feature introduced in 0.13 now finally runs on the GPU via shader.
+This crates served its purpose and will no longer receive updates.
+
 ### Features
 
 -   Sprite sheet animation support
